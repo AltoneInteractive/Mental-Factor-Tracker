@@ -93,7 +93,33 @@ Before you begin, ensure you have the following installed:
 
 ## Building for Production 🏗️
 
-### Android APK
+### Automated Builds (Recommended) 🤖
+
+The easiest way to get release builds is through GitHub Actions:
+
+1. **Quick Start (Debug Signing):**
+   ```bash
+   git tag v1.0.0
+   git push origin v1.0.0
+   ```
+   GitHub Actions will automatically build and release the APK!
+
+2. **Production Setup (Proper Signing):**
+   - See [CI/CD Setup Guide](docs/CICD_SETUP.md) for complete instructions
+   - One-time setup: Generate keystore and add to GitHub Secrets
+   - Every release: Just push a tag and get signed APK + AAB
+
+**Benefits:**
+- Consistent builds every time
+- No local setup needed
+- Automatic releases on GitHub
+- Both APK (for direct install) and AAB (for Play Store)
+
+### Manual Builds (Local)
+
+If you prefer to build locally:
+
+#### Android APK
 
 1. **Generate a release keystore** (first time only)
    ```bash
@@ -109,7 +135,7 @@ Before you begin, ensure you have the following installed:
 
    The APK will be at: `android/app/build/outputs/apk/release/app-release.apk`
 
-### Android App Bundle (for Play Store)
+#### Android App Bundle (for Play Store)
 
 ```bash
 cd android
@@ -191,6 +217,12 @@ npm run android
 
 All your data is stored locally on your device. Nothing is sent to external servers. Your mental health data is completely private and under your control.
 
+## Documentation 📚
+
+- **[Quick Start Guide](QUICKSTART.md)** - Get up and running in minutes
+- **[CI/CD Setup](docs/CICD_SETUP.md)** - Automated builds with GitHub Actions
+- **[Release Guide](docs/RELEASING.md)** - How to create new releases
+
 ## Contributing 🤝
 
 This is a personal mental health tracking tool, but if you have suggestions or improvements:
@@ -200,6 +232,8 @@ This is a personal mental health tracking tool, but if you have suggestions or i
 3. Commit your changes (`git commit -m 'Add amazing feature'`)
 4. Push to the branch (`git push origin feature/amazing-feature`)
 5. Open a Pull Request
+
+All PRs automatically trigger build checks via GitHub Actions!
 
 ## License 📄
 

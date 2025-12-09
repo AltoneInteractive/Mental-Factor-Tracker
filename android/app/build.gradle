@@ -28,29 +28,34 @@ android {
             keyPassword 'android'
         }
         release {
-            // Use environment variables if available (for CI/CD)
-            // Otherwise fall back to debug keystore for local development
-            def keystorePropertiesFile = rootProject.file("keystore.properties")
-            if (keystorePropertiesFile.exists()) {
-                def keystoreProperties = new Properties()
-                keystoreProperties.load(new FileInputStream(keystorePropertiesFile))
-
-                storeFile file(keystoreProperties['storeFile'])
-                storePassword keystoreProperties['storePassword']
-                keyAlias keystoreProperties['keyAlias']
-                keyPassword keystoreProperties['keyPassword']
-            } else if (System.getenv('KEYSTORE_FILE')) {
-                // GitHub Actions / CI environment
+            // Priority order: CI env vars > keystore.properties > debug.keystore fallback
+            if (System.getenv('KEYSTORE_FILE')) {
+                // GitHub Actions / CI environment with release keystore
+                println("✓ Using release signing from CI environment variables")
                 storeFile file(System.getenv('KEYSTORE_FILE'))
                 storePassword System.getenv('KEYSTORE_PASSWORD')
                 keyAlias System.getenv('KEY_ALIAS')
                 keyPassword System.getenv('KEY_PASSWORD')
             } else {
-                // Fall back to debug keystore for development
-                storeFile file('debug.keystore')
-                storePassword 'android'
-                keyAlias 'androiddebugkey'
-                keyPassword 'android'
+                def keystorePropertiesFile = rootProject.file("keystore.properties")
+                if (keystorePropertiesFile.exists()) {
+                    // Local development with keystore.properties
+                    println("✓ Using release signing from keystore.properties")
+                    def keystoreProperties = new Properties()
+                    keystoreProperties.load(new FileInputStream(keystorePropertiesFile))
+
+                    storeFile file(keystoreProperties['storeFile'])
+                    storePassword keystoreProperties['storePassword']
+                    keyAlias keystoreProperties['keyAlias']
+                    keyPassword keystoreProperties['keyPassword']
+                } else {
+                    // Fall back to debug keystore for development/testing
+                    println("⚠ Using DEBUG signing for release build (testing only - not for production!)")
+                    storeFile file('debug.keystore')
+                    storePassword 'android'
+                    keyAlias 'androiddebugkey'
+                    keyPassword 'android'
+                }
             }
         }
     }

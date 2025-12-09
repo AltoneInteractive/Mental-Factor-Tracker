@@ -44,14 +44,27 @@ jobs:
       - name: Grant execute permission for gradlew
         run: chmod +x android/gradlew
 
-      - name: Decode Keystore
+      - name: Prepare Keystore
         run: |
           if [ -n "${{ secrets.KEYSTORE_BASE64 }}" ]; then
+            echo "Using release keystore from secrets"
             echo "${{ secrets.KEYSTORE_BASE64 }}" | base64 -d > android/app/release.keystore
             echo "KEYSTORE_FILE=release.keystore" >> $GITHUB_ENV
           else
-            echo "No keystore secret found, using debug keystore"
-            echo "KEYSTORE_FILE=debug.keystore" >> $GITHUB_ENV
+            echo "No keystore secret found, generating debug keystore for testing"
+            # Generate a debug keystore for CI testing (not for production use)
+            # Note: Uses standard Android debug credentials (publicly known)
+            keytool -genkeypair \
+              -keystore android/app/debug.keystore \
+              -alias androiddebugkey \
+              -keyalg RSA \
+              -keysize 2048 \
+              -validity 10000 \
+              -storepass android \
+              -keypass android \
+              -dname "CN=Android Debug,O=Android,C=US"
+            # Do NOT set KEYSTORE_FILE - let Gradle use its debug fallback
+            echo "Debug keystore generated at android/app/debug.keystore"
           fi
 
       - name: Build Release APK

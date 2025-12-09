@@ -53,7 +53,8 @@ jobs:
           else
             echo "No keystore secret found, generating debug keystore for testing"
             # Generate a debug keystore for CI testing (not for production use)
-            keytool -genkeypair -v \
+            # Note: Uses standard Android debug credentials (publicly known)
+            keytool -genkeypair \
               -keystore android/app/debug.keystore \
               -alias androiddebugkey \
               -keyalg RSA \

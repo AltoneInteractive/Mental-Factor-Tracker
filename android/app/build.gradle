@@ -72,4 +72,17 @@ dependencies {
     implementation("com.facebook.react:hermes-android")
 }
 
-apply from: file("../../node_modules/@react-native-community/cli-platform-android/native_modules.gradle"); applyNativeModulesAppBuildGradle(project)
+// Safely apply React Native CLI native modules integration. In some CI runs node_modules may be missing
+// or the helper function may not be available; guard to avoid Gradle evaluation failures.
+
+def nativeModulesFile = file("../../node_modules/@react-native-community/cli-platform-android/native_modules.gradle")
+if (nativeModulesFile.exists()) {
+    apply from: nativeModulesFile
+    try {
+        applyNativeModulesAppBuildGradle(project)
+    } catch (Throwable t) {
+        println("Warning: applyNativeModulesAppBuildGradle() failed: " + t.getMessage())
+    }
+} else {
+    println("Warning: native_modules.gradle not found at " + nativeModulesFile)
+}
